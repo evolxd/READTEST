@@ -1,31 +1,749 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<title>TCF READ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TCF Reading Trainer</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --card2:#1f2937;
+      --line:#334155;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --accent:#22c55e;
+      --accent2:#38bdf8;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    }
+
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      padding:14px;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(15,23,42,.95);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+      padding:10px 0 12px;
+      margin-bottom:12px;
+    }
+
+    .title{
+      font-size:20px;
+      font-weight:700;
+      margin:0 0 10px;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:10px;
+    }
+
+    select, button{
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:15px;
+      background:var(--card2);
+      color:var(--text);
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    button.primary{
+      background:var(--accent2);
+      color:#062033;
+      font-weight:700;
+    }
+
+    button.success{
+      background:var(--accent);
+      color:#052814;
+      font-weight:700;
+    }
+
+    button.warn{
+      background:var(--warn);
+      color:#2c1b00;
+      font-weight:700;
+    }
+
+    button.danger{
+      background:var(--danger);
+      color:#fff;
+      font-weight:700;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:14px;
+      box-shadow:0 6px 24px rgba(0,0,0,.22);
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#0b1220;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .progress{
+      height:10px;
+      background:#0b1220;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      margin:10px 0 4px;
+    }
+
+    .bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent2),var(--accent));
+      transition:width .25s ease;
+    }
+
+    .passage{
+      white-space:pre-wrap;
+      line-height:1.8;
+      font-size:16px;
+      color:#e5e7eb;
+      margin-top:10px;
+    }
+
+    .question{
+      font-size:18px;
+      font-weight:700;
+      line-height:1.6;
+      margin-bottom:14px;
+    }
+
+    .options{
+      display:grid;
+      gap:10px;
+    }
+
+    .option{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#0b1220;
+      cursor:pointer;
+      transition:.18s ease;
+      line-height:1.6;
+    }
+
+    .option:hover{
+      transform:translateY(-1px);
+      border-color:var(--accent2);
+    }
+
+    .option.selected{
+      border-color:var(--accent2);
+      background:#082033;
+    }
+
+    .option.correct{
+      border-color:var(--accent);
+      background:#052814;
+    }
+
+    .option.wrong{
+      border-color:var(--danger);
+      background:#2a0f14;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .navs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .result{
+      margin-top:12px;
+      font-weight:700;
+      font-size:16px;
+    }
+
+    .ok{color:#4ade80}
+    .bad{color:#f87171}
+    .mid{color:#fbbf24}
+
+    .analysis-block{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:#0b1220;
+      border:1px solid var(--line);
+    }
+
+    .analysis-title{
+      font-size:15px;
+      font-weight:700;
+      margin-bottom:8px;
+      color:#cbd5e1;
+    }
+
+    .analysis-text{
+      white-space:pre-wrap;
+      line-height:1.75;
+      color:#e2e8f0;
+      font-size:15px;
+    }
+
+    .small{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .loading{
+      text-align:center;
+      padding:40px 20px;
+      color:var(--muted);
+    }
+
+    .footer-space{
+      height:30px;
+    }
+
+    @media (max-width:640px){
+      .controls{
+        grid-template-columns:1fr;
+      }
+
+      .actions{
+        grid-template-columns:1fr;
+      }
+
+      .navs{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .title{
+        font-size:18px;
+      }
+
+      .question{
+        font-size:17px;
+      }
+
+      .passage{
+        font-size:15px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">TCF 阅读刷题系统</div>
+      <div class="controls">
+        <select id="testSelect"></select>
+        <select id="questionSelect"></select>
+        <button class="primary" id="jumpBtn">跳转</button>
+      </div>
+      <div class="progress">
+        <div class="bar" id="progressBar"></div>
+      </div>
+      <div class="small" id="progressText">加载中...</div>
+    </div>
 
-<h1>TCF Reading System</h1>
+    <div id="app">
+      <div class="loading">正在加载题库...</div>
+    </div>
 
-<div id="app">Loading...</div>
+    <div class="footer-space"></div>
+  </div>
 
-<script>
+  <script>
+    const BASE_URL = './READ_QUESTIONS_BASE.json';
+    const ENRICHED_URL = './READ_QUESTIONS_ENRICHED_REBUILT.json';
 
-fetch("READ_QUESTIONS_ENRICHED_REBUILT.json")
-.then(r=>r.json())
-.then(data=>{
-    document.getElementById("app").innerHTML =
-        "Questions loaded: " + Object.keys(data).length;
-})
-.catch(e=>{
-    document.getElementById("app").innerHTML =
-        "Error loading JSON";
-});
+    let baseData = {};
+    let enrichedData = {};
+    let testKeys = [];
+    let currentTest = '';
+    let currentQ = 'Q1';
+    let userAnswers = loadJSON('tcf_read_user_answers', {});
+    let reviewState = loadJSON('tcf_read_review_state', {});
+    let revealedState = loadJSON('tcf_read_revealed_state', {});
 
-</script>
+    function loadJSON(key, fallback){
+      try{
+        return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+      }catch{
+        return fallback;
+      }
+    }
 
+    function saveJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    async function loadData(){
+      const [baseRes, enrichedRes] = await Promise.allSettled([
+        fetch(BASE_URL).then(r => r.json()),
+        fetch(ENRICHED_URL).then(r => r.json())
+      ]);
+
+      if(baseRes.status !== 'fulfilled'){
+        document.getElementById('app').innerHTML = '<div class="card">READ_QUESTIONS_BASE.json 加载失败</div>';
+        return;
+      }
+
+      baseData = baseRes.value || {};
+      enrichedData = enrichedRes.status === 'fulfilled' ? enrichedRes.value || {} : {};
+
+      testKeys = Object.keys(baseData).sort((a,b)=>{
+        const na = parseInt(a.replace(/\D/g,'')) || 0;
+        const nb = parseInt(b.replace(/\D/g,'')) || 0;
+        return na - nb;
+      });
+
+      if(!testKeys.length){
+        document.getElementById('app').innerHTML = '<div class="card">没有读取到任何测试题</div>';
+        return;
+      }
+
+      const saved = loadJSON('tcf_read_position', null);
+      if(saved && baseData[saved.test] && baseData[saved.test][saved.q]){
+        currentTest = saved.test;
+        currentQ = saved.q;
+      }else{
+        currentTest = testKeys[0];
+        currentQ = 'Q1';
+      }
+
+      initSelectors();
+      render();
+    }
+
+    function initSelectors(){
+      const testSelect = document.getElementById('testSelect');
+      const questionSelect = document.getElementById('questionSelect');
+
+      testSelect.innerHTML = testKeys.map(t => `<option value="${t}">${t}</option>`).join('');
+      testSelect.value = currentTest;
+
+      fillQuestionSelect();
+
+      testSelect.addEventListener('change', () => {
+        currentTest = testSelect.value;
+        currentQ = 'Q1';
+        fillQuestionSelect();
+        persistPosition();
+        render();
+      });
+
+      document.getElementById('jumpBtn').addEventListener('click', () => {
+        currentTest = testSelect.value;
+        currentQ = questionSelect.value;
+        persistPosition();
+        render();
+      });
+
+      questionSelect.addEventListener('change', () => {
+        currentQ = questionSelect.value;
+        persistPosition();
+      });
+    }
+
+    function fillQuestionSelect(){
+      const questionSelect = document.getElementById('questionSelect');
+      const qKeys = getQuestionKeys(currentTest);
+      questionSelect.innerHTML = qKeys.map(q => `<option value="${q}">${q}</option>`).join('');
+      questionSelect.value = currentQ;
+    }
+
+    function getQuestionKeys(testKey){
+      const test = baseData[testKey] || {};
+      return Object.keys(test).sort((a,b)=>{
+        const na = parseInt(a.replace(/\D/g,'')) || 0;
+        const nb = parseInt(b.replace(/\D/g,'')) || 0;
+        return na - nb;
+      });
+    }
+
+    function persistPosition(){
+      saveJSON('tcf_read_position', { test: currentTest, q: currentQ });
+    }
+
+    function getCurrentItem(){
+      return baseData?.[currentTest]?.[currentQ] || null;
+    }
+
+    function getEnrichedItem(){
+      return enrichedData?.[currentTest]?.[currentQ] || null;
+    }
+
+    function getUserAnswer(testKey, qKey){
+      return userAnswers?.[testKey]?.[qKey] || '';
+    }
+
+    function setUserAnswer(testKey, qKey, value){
+      if(!userAnswers[testKey]) userAnswers[testKey] = {};
+      userAnswers[testKey][qKey] = value;
+      saveJSON('tcf_read_user_answers', userAnswers);
+    }
+
+    function isRevealed(testKey, qKey){
+      return !!revealedState?.[testKey]?.[qKey];
+    }
+
+    function setRevealed(testKey, qKey, value){
+      if(!revealedState[testKey]) revealedState[testKey] = {};
+      revealedState[testKey][qKey] = value;
+      saveJSON('tcf_read_revealed_state', revealedState);
+    }
+
+    function getReview(testKey, qKey){
+      return reviewState?.[testKey]?.[qKey] || false;
+    }
+
+    function setReview(testKey, qKey, value){
+      if(!reviewState[testKey]) reviewState[testKey] = {};
+      reviewState[testKey][qKey] = value;
+      saveJSON('tcf_read_review_state', reviewState);
+    }
+
+    function updateProgress(){
+      const qKeys = getQuestionKeys(currentTest);
+      const total = qKeys.length;
+      const idx = qKeys.indexOf(currentQ);
+      const done = idx >= 0 ? idx + 1 : 1;
+      const pct = total ? (done / total) * 100 : 0;
+
+      document.getElementById('progressBar').style.width = pct + '%';
+
+      const answeredCount = qKeys.filter(q => !!getUserAnswer(currentTest, q)).length;
+      const reviewCount = qKeys.filter(q => getReview(currentTest, q)).length;
+      document.getElementById('progressText').textContent =
+        `${currentTest} — ${currentQ} — 当前进度 ${done}/${total} — 已作答 ${answeredCount} 题 — 标记复习 ${reviewCount} 题`;
+
+      document.getElementById('testSelect').value = currentTest;
+      document.getElementById('questionSelect').value = currentQ;
+    }
+
+    function safeText(v){
+      if(v === null || v === undefined) return '';
+      if(Array.isArray(v)) return v.join('\n');
+      if(typeof v === 'object') return JSON.stringify(v, null, 2);
+      return String(v);
+    }
+
+    function getOptionLetter(idx){
+      return ['A','B','C','D'][idx] || String(idx + 1);
+    }
+
+    function normalizeAnswer(ans){
+      return safeText(ans).trim().toUpperCase();
+    }
+
+    function goPrev(){
+      const qKeys = getQuestionKeys(currentTest);
+      let qi = qKeys.indexOf(currentQ);
+      let ti = testKeys.indexOf(currentTest);
+
+      if(qi > 0){
+        currentQ = qKeys[qi - 1];
+      }else if(ti > 0){
+        currentTest = testKeys[ti - 1];
+        currentQ = getQuestionKeys(currentTest).slice(-1)[0];
+        fillQuestionSelect();
+      }
+
+      persistPosition();
+      render();
+    }
+
+    function goNext(){
+      const qKeys = getQuestionKeys(currentTest);
+      let qi = qKeys.indexOf(currentQ);
+      let ti = testKeys.indexOf(currentTest);
+
+      if(qi < qKeys.length - 1){
+        currentQ = qKeys[qi + 1];
+      }else if(ti < testKeys.length - 1){
+        currentTest = testKeys[ti + 1];
+        currentQ = 'Q1';
+        fillQuestionSelect();
+      }
+
+      persistPosition();
+      render();
+    }
+
+    function renderAnalysisHTML(enriched){
+      if(!enriched){
+        return `
+          <div class="analysis-block">
+            <div class="analysis-title">AI 三语解析</div>
+            <div class="analysis-text">当前还没有解析数据。后面可以接入 Gemini 自动生成。</div>
+          </div>
+        `;
+      }
+
+      const blocks = [];
+
+      if(enriched.fr || enriched.en || enriched.cn){
+        blocks.push(`
+          <div class="analysis-block">
+            <div class="analysis-title">三语解析</div>
+            <div class="analysis-text">
+法语：
+${safeText(enriched.fr)}
+
+英语：
+${safeText(enriched.en)}
+
+中文：
+${safeText(enriched.cn)}
+            </div>
+          </div>
+        `);
+      }
+
+      if(enriched.explanation){
+        blocks.push(`
+          <div class="analysis-block">
+            <div class="analysis-title">解题说明</div>
+            <div class="analysis-text">${safeText(enriched.explanation)}</div>
+          </div>
+        `);
+      }
+
+      if(enriched.keywords || enriched.points || enriched.exam_points){
+        const v = enriched.keywords || enriched.points || enriched.exam_points;
+        blocks.push(`
+          <div class="analysis-block">
+            <div class="analysis-title">考点提取</div>
+            <div class="analysis-text">${safeText(v)}</div>
+          </div>
+        `);
+      }
+
+      if(enriched.translation){
+        blocks.push(`
+          <div class="analysis-block">
+            <div class="analysis-title">翻译</div>
+            <div class="analysis-text">${safeText(enriched.translation)}</div>
+          </div>
+        `);
+      }
+
+      if(!blocks.length){
+        blocks.push(`
+          <div class="analysis-block">
+            <div class="analysis-title">AI 三语解析</div>
+            <div class="analysis-text">${safeText(enriched)}</div>
+          </div>
+        `);
+      }
+
+      return blocks.join('');
+    }
+
+    function render(){
+      const app = document.getElementById('app');
+      const item = getCurrentItem();
+
+      if(!item){
+        app.innerHTML = '<div class="card">当前题目不存在</div>';
+        return;
+      }
+
+      const text = safeText(item.text);
+      const question = safeText(item.question);
+      const options = Array.isArray(item.options) ? item.options : [];
+      const answer = normalizeAnswer(item.answer);
+      const selected = getUserAnswer(currentTest, currentQ);
+      const revealed = isRevealed(currentTest, currentQ);
+      const review = getReview(currentTest, currentQ);
+      const enriched = getEnrichedItem();
+
+      let resultHTML = '';
+      if(revealed){
+        if(selected){
+          const ok = normalizeAnswer(selected) === answer;
+          resultHTML = `
+            <div class="result ${ok ? 'ok' : 'bad'}">
+              ${ok ? '回答正确' : '回答错误'} — 你的答案：${selected} — 正确答案：${answer}
+            </div>
+          `;
+        }else{
+          resultHTML = `
+            <div class="result mid">
+              正确答案：${answer}
+            </div>
+          `;
+        }
+      }
+
+      app.innerHTML = `
+        <div class="card">
+          <div class="meta">
+            <div class="badge">套题 ${currentTest}</div>
+            <div class="badge">题号 ${currentQ}</div>
+            <div class="badge">${review ? '已标记复习' : '未标记复习'}</div>
+          </div>
+
+          ${text ? `
+            <div class="analysis-title">原文</div>
+            <div class="passage">${escapeHTML(text)}</div>
+          ` : ''}
+
+        </div>
+
+        <div class="card">
+          <div class="analysis-title">问题</div>
+          <div class="question">${escapeHTML(question)}</div>
+
+          <div class="options">
+            ${options.map((opt, idx) => {
+              const letter = getOptionLetter(idx);
+              let cls = 'option';
+              if(selected === letter) cls += ' selected';
+
+              if(revealed){
+                if(letter === answer) cls += ' correct';
+                else if(letter === selected && selected !== answer) cls += ' wrong';
+              }
+
+              return `
+                <div class="${cls}" data-letter="${letter}">
+                  <strong>${letter}.</strong> ${escapeHTML(safeText(opt))}
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="actions">
+            <button class="success" id="checkBtn">查看答案</button>
+            <button class="warn" id="reviewBtn">${review ? '取消复习标记' : '标记复习'}</button>
+            <button class="danger" id="clearBtn">清除本题选择</button>
+          </div>
+
+          ${resultHTML}
+          <div class="small">说明 — 先点选项，再点“查看答案”。手机上就是一题一页。</div>
+        </div>
+
+        <div class="card">
+          <div class="analysis-title">AI 解析区</div>
+          ${renderAnalysisHTML(enriched)}
+        </div>
+
+        <div class="navs">
+          <button id="prevBtn">上一题</button>
+          <button class="primary" id="nextBtn">下一题</button>
+        </div>
+      `;
+
+      bindEvents();
+      updateProgress();
+    }
+
+    function bindEvents(){
+      document.querySelectorAll('.option').forEach(el => {
+        el.addEventListener('click', () => {
+          const letter = el.getAttribute('data-letter');
+          setUserAnswer(currentTest, currentQ, letter);
+          render();
+        });
+      });
+
+      const checkBtn = document.getElementById('checkBtn');
+      const reviewBtn = document.getElementById('reviewBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      if(checkBtn){
+        checkBtn.addEventListener('click', () => {
+          setRevealed(currentTest, currentQ, true);
+          render();
+        });
+      }
+
+      if(reviewBtn){
+        reviewBtn.addEventListener('click', () => {
+          setReview(currentTest, currentQ, !getReview(currentTest, currentQ));
+          render();
+        });
+      }
+
+      if(clearBtn){
+        clearBtn.addEventListener('click', () => {
+          if(userAnswers[currentTest]) delete userAnswers[currentTest][currentQ];
+          if(revealedState[currentTest]) delete revealedState[currentTest][currentQ];
+          saveJSON('tcf_read_user_answers', userAnswers);
+          saveJSON('tcf_read_revealed_state', revealedState);
+          render();
+        });
+      }
+
+      if(prevBtn) prevBtn.addEventListener('click', goPrev);
+      if(nextBtn) nextBtn.addEventListener('click', goNext);
+    }
+
+    function escapeHTML(str){
+      return safeText(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
-
