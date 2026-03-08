@@ -1,1 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TCF READ</title>
+</head>
+
+<body>
+
+<h1>TCF Reading System</h1>
+
+<div id="app">Loading...</div>
+
+<script>
+
+fetch("READ_QUESTIONS_ENRICHED_REBUILT.json")
+.then(r=>r.json())
+.then(data=>{
+    document.getElementById("app").innerHTML =
+        "Questions loaded: " + Object.keys(data).length;
+})
+.catch(e=>{
+    document.getElementById("app").innerHTML =
+        "Error loading JSON";
+});
+
+</script>
+
+</body>
+</html>
 
