@@ -647,7 +647,7 @@ function refresh(){
 
 async function loadData(){
   try{
-    const r = await fetch("./READ_QUESTIONS_ENRICHED_REBUILT.json", { cache: "no-store" });
+    const r = await fetch("./READ_QUESTIONS_ENRICHED.json", { cache: "no-store" });
     if(!r.ok) throw new Error("读取 JSON 失败");
     const data = await r.json();
 
@@ -677,7 +677,7 @@ async function loadData(){
     refresh();
   }catch(err){
     document.getElementById("questionBox").innerHTML =
-      "无法读取 READ_QUESTIONS_ENRICHED_REBUILT.json。请确认 index.html 和 JSON 在同一目录。";
+      "无法读取 READ_QUESTIONS_ENRICHED.json。请确认 index.html 和 JSON 在同一目录。";
     console.error(err);
   }
 }
@@ -734,4 +734,3 @@ loadData();
 </script>
 </body>
 </html>
-
