@@ -647,7 +647,7 @@ function refresh(){
 
 async function loadData(){
   try{
-    const r = await fetch("./READ_QUESTIONS_ENRICHED.json", { cache: "no-store" });
+    const r = await fetch("https://raw.githubusercontent.com/evolxd/READTEST/main/READ_QUESTIONS_ENRICHED.json");
     if(!r.ok) throw new Error("读取 JSON 失败");
     const data = await r.json();
 
@@ -734,3 +734,4 @@ loadData();
 </script>
 </body>
 </html>
+
